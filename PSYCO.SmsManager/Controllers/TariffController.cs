@@ -36,10 +36,15 @@ namespace PSYCO.SmsManager.Controllers
             try
             {
 
-                var tariffList = await _tariffService.ListAsync(new SyncFusionSpecification<SmsTarrifModel, int>(model)
-                    );
+                var tariffList = (await _tariffService.ListAsync(new SyncFusionSpecification<SmsTarrifModel, int>(model)
+                    )).Select(s => new SmsTariffListViewModel()
+                    {
+                        Id = s.Id,
+                        Rate = s.Rate,
+                        StartTime = new PersianDateTime(s.StartTime).ToShortDate1String()
+                    }).ToList();
                 var count = await _tariffService.CountAsync(new SyncFusionSpecification<SmsTarrifModel, int>(model));
-                var result = new UrlAdaptorResponse<SmsTarrifModel>()
+                var result = new UrlAdaptorResponse<SmsTariffListViewModel>()
                 {
 
                     count = count,
@@ -55,6 +60,28 @@ namespace PSYCO.SmsManager.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult> Get(int id)
+        {
+
+            try
+            {
+                var tariff = await _tariffService.GetByIdAsync(id);
+                return Ok(tariff);
+            }
+            catch (Exception ex)
+            {
+
+                return HandleException(ex);
+
+            }
+        }
+
+
+
+
+
+
         [HttpPost]
         public async Task<ActionResult> New(SmsTariffNewViewModel vmodel)
         {
@@ -65,7 +92,7 @@ namespace PSYCO.SmsManager.Controllers
                 {
 
                     Rate = vmodel.Rate,
-                    StartTime = PersianDateTime.Parse(vmodel.StartTime)
+                    StartTime = PersianDateTime.Parse(int.Parse($"{vmodel.Year}{vmodel.Month.ToString("D2")}{vmodel.Day.ToString("D2")}"))
                 };
 
 
@@ -82,13 +109,23 @@ namespace PSYCO.SmsManager.Controllers
             }
         }
 
+
+
+
     }
 
 
     public class SmsTariffNewViewModel
     {
         public int Rate { get; set; }
+        public int Day { get; set; }
+        public int Month { get; set; }
+        public int Year { get; set; }
+    }
+    public class SmsTariffListViewModel
+    {
+        public int Id { get; set; }
+        public int Rate { get; set; }
         public string StartTime { get; set; }
-
     }
 }

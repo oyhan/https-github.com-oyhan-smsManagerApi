@@ -60,7 +60,7 @@ namespace PSYCO.SmsManager
 
             return WebHost.CreateDefaultBuilder()
                 .UseStartup<Startup>()
-                .UseUrls($"http://*:{_port ?? "9501"}");
+                .UseUrls($"http://*:{_port ?? "2594"}");
         }
     }
 }
